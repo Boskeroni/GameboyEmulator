@@ -42,6 +42,7 @@ enum PpuState {
 }
 
 pub struct Ppu {
+    vblank_ticks: usize,
     ticks: usize,
     state: PpuState,
     window_line: usize
@@ -49,6 +50,7 @@ pub struct Ppu {
 impl Ppu {
     pub fn default() -> Self {
         Self {
+            vblank_ticks: 0,
             ticks: 0,
             state: PpuState::Oam,
             window_line: 0,
@@ -116,9 +118,14 @@ pub fn update_ppu(ppu: &mut Ppu, mem: &mut Memory, ticks: u8) -> Option<Vec<u8>>
             } 
             stat_interrupt(mem, STAT_OAM, 2);
         }, // waits
-        VBlank => {    
-            if ppu.ticks < HBLANK_CYCLES*10 {
-                let new_ly = 144+(ppu.ticks/HBLANK_CYCLES) as u8;
+        VBlank => {
+            ppu.vblank_ticks += ticks as usize;
+            if ppu.vblank_ticks < HBLANK_CYCLES*10 {
+                let new_ly = (144+(ppu.vblank_ticks/HBLANK_CYCLES) as u8) % 153;
+                let old_ly = mem.read(PpuRegisters::LY as u16);
+                if new_ly != old_ly {
+                    ppu.ticks = 0;
+                }
                 mem.write(PpuRegisters::LY as u16, new_ly);
                 return None;
             }
@@ -127,7 +134,7 @@ pub fn update_ppu(ppu: &mut Ppu, mem: &mut Memory, ticks: u8) -> Option<Vec<u8>>
             mem.write(PpuRegisters::LY as u16, 0)
         }, // waits
     }
-    return None;
+    None
 }
 
 fn draw(ppu: &mut Ppu, mem: &mut Memory) -> Vec<u8> {
@@ -206,7 +213,6 @@ fn draw_sprites(mem: &Memory, lcdc: u8, ly: u8) -> Vec<u8> {
     let mut oam_buffer = Vec::new();
     for i in 0..40 {
         let oam_sprite = mem.oam_search(i);
-
         if oam_sprite[0] >= 160 || oam_sprite[0] == 0 {
             continue;
         }
@@ -219,7 +225,6 @@ fn draw_sprites(mem: &Memory, lcdc: u8, ly: u8) -> Vec<u8> {
         }
     }
     oam_buffer.sort_by(|a, b| a[1].cmp(&b[1]));
-
     let mut sprite_pixels = vec![BLANK_PIXEL; 300]; // 160 (length of lcd + 8x2 pad)
     for sprite in oam_buffer {
         let tile_index;
