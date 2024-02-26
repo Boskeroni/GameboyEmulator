@@ -79,18 +79,11 @@ impl MBC for MBC1 {
         }
     }
     fn read_ram(&self, address: usize) -> u8 {
-        if !self.ram_enabled {
-            eprintln!("read to ram was ignored");
-            return 0xFF;
-        }
         let offset_address = address - 0xA000;
-        self.ram[self.ram_index * 0x2000 + offset_address]
+        println!("{offset_address:#01X} and {:#01X}", self.ram_index);
+        self.ram[(self.ram_index * 0x2000) + offset_address]
     }
     fn write_ram(&mut self, address: usize, data: u8) {
-        if !self.ram_enabled {
-            eprintln!("write to ram was ignored");
-            return;
-        }
         let offset_address = address - 0xA000;
         self.ram[self.ram_index * 0x2000 + offset_address] = data;
     }
@@ -198,23 +191,27 @@ pub fn create_mbc(rom: &Vec<u8>) -> Box<dyn MBC> {
     let rom_length = 0x3FFF + 0x4000 * (rom_size - 1) as usize;
     let rom_bank = rom[0x0000..=rom_length].to_vec();
 
-    //let ram_size_code = rom[0x149];
-    /* let ram_size = match ram_size_code {
-        0x00 => 1,
+    let ram_size_code = rom[0x149];
+    let ram_size = match ram_size_code {
+        0x00 => 0,
+        0x01 => 0x8000,
+        0x02 => 0x2000,
+        0x03 => 0x8000,
+        0x04 => 0x20000,
+        0x05 => 0x10000,
         _ => panic!("unsupported ram_size provided"),
-    }; */
+    };
+    let ram = vec![0; ram_size];
 
     match mbc_type_code {
         0x00 | 0x01 | 0x02 | 0x03 => {
-            let ram_bank = vec![0; 0x2000];
-
             Box::new(MBC1 {
                 rom_banks: rom_bank,
                 total_rom_banks: rom_size as usize,
                 high_bank_index: 1,
                 zero_bank_index: 0,
 
-                ram: ram_bank,
+                ram,
                 ram_index: 0,
 
                 ram_enabled: true,
@@ -231,7 +228,6 @@ pub fn create_mbc(rom: &Vec<u8>) -> Box<dyn MBC> {
             })
         }
         0x0F..=0x13 => {
-           let ram = rom[rom_length+1..].to_vec();
            Box::new(MBC3 {
             rom: rom_bank,
             high_rom_index: 1,
