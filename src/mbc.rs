@@ -80,7 +80,6 @@ impl MBC for MBC1 {
     }
     fn read_ram(&self, address: usize) -> u8 {
         let offset_address = address - 0xA000;
-        println!("{offset_address:#01X} and {:#01X}", self.ram_index);
         self.ram[(self.ram_index * 0x2000) + offset_address]
     }
     fn write_ram(&mut self, address: usize, data: u8) {
@@ -193,7 +192,7 @@ pub fn create_mbc(rom: &Vec<u8>) -> Box<dyn MBC> {
 
     let ram_size_code = rom[0x149];
     let ram_size = match ram_size_code {
-        0x00 => 0,
+        0x00 => 0x2000,
         0x01 => 0x8000,
         0x02 => 0x2000,
         0x03 => 0x8000,
@@ -228,13 +227,13 @@ pub fn create_mbc(rom: &Vec<u8>) -> Box<dyn MBC> {
             })
         }
         0x0F..=0x13 => {
-           Box::new(MBC3 {
-            rom: rom_bank,
-            high_rom_index: 1,
-            ram,
-            ram_index: 0,
-            ram_enabled: true,
-           })
+            Box::new(MBC3 {
+                rom: rom_bank,
+                high_rom_index: 1,
+                ram,
+                ram_index: 0,
+                ram_enabled: true,
+            })
         }
         _ => panic!("unsupported MBC type"),
     }
