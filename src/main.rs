@@ -37,14 +37,14 @@ fn misc_inputs(speed_up_factor: &mut usize) {
 
 pub fn joypad_interrupt(mem: &mut Memory) {
     let mut interrupt = false;
-    interrupt |= is_key_down(KeyCode::A);
-    interrupt |= is_key_down(KeyCode::D);
-    interrupt |= is_key_down(KeyCode::Enter);
-    interrupt |= is_key_down(KeyCode::Space);
-    interrupt |= is_key_down(KeyCode::Left);
-    interrupt |= is_key_down(KeyCode::Right);
-    interrupt |= is_key_down(KeyCode::Up);
-    interrupt |= is_key_down(KeyCode::Down);
+    interrupt |= is_key_pressed(KeyCode::A);
+    interrupt |= is_key_pressed(KeyCode::D);
+    interrupt |= is_key_pressed(KeyCode::Enter);
+    interrupt |= is_key_pressed(KeyCode::Space);
+    interrupt |= is_key_pressed(KeyCode::Down);
+    interrupt |= is_key_pressed(KeyCode::Left);
+    interrupt |= is_key_pressed(KeyCode::Right);
+    interrupt |= is_key_pressed(KeyCode::Up);
 
     if interrupt {
         let interrupt = mem.read(INTERRUPT_F_ADDRESS);
@@ -126,7 +126,7 @@ async fn main() {
 
         while pixel_buffer.len() != 23040*speed_up_factor {
             // fail-safe for the boot rom
-            if cpu.regs.pc == 0x100 && !args.booted {
+            if (cpu.regs.pc == 0x100 && !args.booted) || cpu.stopped {
                 break 'full;
             }
 
@@ -148,8 +148,8 @@ async fn main() {
         for (j, pixel) in pixel_buffer.iter().enumerate() {
             let pixel = to_screen_pixel(*pixel);
             draw_rectangle(
-                ((j%160)*SCALE_FACTOR as usize) as f32, //pos
-                ((j/160)*SCALE_FACTOR as usize) as f32, //pos
+                ((j%160)*SCALE_FACTOR as usize) as f32, //X-pos
+                ((j/160)*SCALE_FACTOR as usize) as f32, //Y-pos
                 SCALE_FACTOR as f32, //width
                 SCALE_FACTOR as f32, //height
                 pixel // color
@@ -157,10 +157,5 @@ async fn main() {
         }
         next_frame().await;
         pixel_buffer.clear();
-
-        // debug section of the emulator
-        if !args.booted && cpu.regs.pc == 0xE9 {
-            break 'full;
-        }
     }
 }

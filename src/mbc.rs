@@ -173,6 +173,10 @@ impl MBC for MBC3 {
 }
 
 pub fn create_mbc(rom: &Vec<u8>) -> Box<dyn MBC> {
+    let mut rom = rom.clone();
+    if rom.len() == 0x100 {
+        rom.extend(vec![0; 0xFF00]);
+    }
     let mbc_type_code = rom[0x147];
     let rom_size_code = rom[0x148];
 
