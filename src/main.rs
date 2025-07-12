@@ -126,7 +126,7 @@ async fn main() {
 
         while pixel_buffer.len() != 23040*speed_up_factor {
             // fail-safe for the boot rom
-            if (cpu.regs.pc == 0x100 && !args.booted) || cpu.stopped {
+            if cpu.regs.pc == 0x100 && !args.booted {
                 break 'full;
             }
 

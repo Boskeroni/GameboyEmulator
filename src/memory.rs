@@ -105,13 +105,11 @@ impl Memory {
             return self.mbc.read_ram(address);
         }
 
-        if address == JOYPAD_ADDRESS as usize {
-            return joypad(self.mem[JOYPAD_ADDRESS]);
+        match address {
+            JOYPAD_ADDRESS => return joypad(self.mem[JOYPAD_ADDRESS]),
+            0xFF04 => return (self.div >> 8) as u8,
+            _ => {}
         }
-        if address == 0xFF04 {
-            return (self.div >> 8) as u8;
-        }
-
         // only the second bit of the stat register matter
         let blocker = self.mem[0xFF41] & 0b0000_0011;
         match (blocker, is_within_oam(address), is_within_vram(address)) {
@@ -123,7 +121,10 @@ impl Memory {
 
     /// just makes reading 16-bits of data more convenient
     pub fn read_word(&mut self, address: u16) -> u16 {
-        little_endian_combine(self.read(address), self.read(address+1))
+        little_endian_combine(
+            self.read(address), 
+            self.read(address+1)
+        )
     }
 
     pub fn oam_search(&self, index: u8) -> [u8; 4] {
@@ -189,13 +190,13 @@ pub fn update_timer(memory: &mut Memory, cycles: u8) {
     use TimerRegisters::*;
     let tac = memory.mem[TAC as usize];
 
-    let timer_enable = tac & 0b0000_0100 != 0;
+    let timer_enable = tac & 0x4 != 0;
     if !timer_enable {
         memory.div = memory.div.wrapping_add(cycles as u16);
         return;
     }
 
-    let bit_position = match tac & 0b0000_0011 {
+    let bit_position = match tac & 0x3 {
         0 => 9,
         1 => 3,
         2 => 5,
@@ -203,12 +204,13 @@ pub fn update_timer(memory: &mut Memory, cycles: u8) {
         _ => unreachable!(),
     };
 
-    let mut prev_edge = (memory.div & 1<<bit_position)!=0;
+    let mut prev_edge = (memory.div & 1<<bit_position) != 0;
     for _ in 0..cycles {
         memory.div = memory.div.wrapping_add(1);
 
-        let anded_result = (memory.div & 1<<bit_position)!=0;
-        if prev_edge && !anded_result {            
+        let anded_result = (memory.div & 1<<bit_position) != 0;
+        if prev_edge && !anded_result {
+
             let tima = memory.mem[TIMA as usize];
             let (new_tima, overflow) = tima.overflowing_add(1);
             memory.mem[TIMA as usize] = new_tima;

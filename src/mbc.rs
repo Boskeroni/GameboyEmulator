@@ -239,6 +239,6 @@ pub fn create_mbc(rom: &Vec<u8>) -> Box<dyn MBC> {
                 ram_enabled: true,
             })
         }
-        _ => panic!("unsupported MBC type"),
+        _ => panic!("unsupported MBC type {mbc_type_code:X}"),
     }
 }
