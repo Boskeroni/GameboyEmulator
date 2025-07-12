@@ -50,4 +50,4 @@ This example is more geared to showing the PPU working intentionally. Its playin
 - [Pandocs](https://gbdev.io/pandocs)
 - [Opcodes](https://rgbds.gbdev.io/docs/v0.6.1/gbz80.7)
 - [Detailed information on the PPU](https://hacktix.github.io/GBEDG/ppu)
-- [Talk which inspired this project](https://youtube.com/watch?v=HyzD8pNlpwl)
+- [Talk which inspired this project](https://youtube.com/watch?v=HyzD8pNlpwI)
