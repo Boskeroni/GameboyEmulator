@@ -32,18 +32,9 @@ Even though I have finished with the project, these would be the things I would 
 - [ ] allows for custom keybinds to be set
 
 ## Demonstration
+[This example](https://youtu.be/XXPbhKkHOwo) shows the emulator passing all of [Blargg's test ROMs](https://github.com/retrio/gb-test-roms/tree/master/cpu_instrs). These test for CPU functionality and should mean that a fully valid CPU has been built. It also partially shows MBC's working as it uses MBC1.
 
-<video width="320" height="240" controls>
-    <source src="include/testing_example.mp4" type="video/mp4">
-</video>
-
-This example shows the emulator passing all of [Blargg's test ROMs](https://github.com/retrio/gb-test-roms/tree/master/cpu_instrs). These test for CPU functionality and should mean that a fully valid CPU has been built. It also partially shows MBC's working as it uses MBC1.
-
-<video width="320" height="240" controls>
-    <source src="include/zelda_example.mp4" type="video/mp4">
-</video>
-
-This example is more geared to showing the PPU working intentionally. Its playing Zelda Link's Awakening, and also shows a feature I added which allows the user to speed up and slow down the game. This was a request from one of my friend's who saw other emulators also implement it.
+[This example](https://youtu.be/t0ev88FgQJs) is more geared to showing the PPU working intentionally. Its playing Zelda Link's Awakening, and also shows a feature I added which allows the user to speed up and slow down the game. This was a request from one of my friend's who saw other emulators also implement it.
 
 ## Resources
 
@@ -51,3 +42,4 @@ This example is more geared to showing the PPU working intentionally. Its playin
 - [Opcodes](https://rgbds.gbdev.io/docs/v0.6.1/gbz80.7)
 - [Detailed information on the PPU](https://hacktix.github.io/GBEDG/ppu)
 - [Talk which inspired this project](https://youtube.com/watch?v=HyzD8pNlpwI)
+
